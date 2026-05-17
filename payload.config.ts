@@ -20,7 +20,7 @@ export default buildConfig({
   },
   collections: [Users, Media],
   editor: lexicalEditor(),
-  secret: process.env.PAYLOAD_SECRET || "",
+  secret: process.env.PAYLOAD_SECRET || "temp_fallback_secret_skyfit_ecom_2026",
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),
   },
