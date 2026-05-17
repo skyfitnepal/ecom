@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-display: "Outfit", sans-serif;
+
+  --color-background: hsl(0 0% 100%);
+  --color-foreground: hsl(0 0% 3.9%);
+  
+  --color-primary: hsl(179 77% 31%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  
+  --color-secondary: hsl(0 0% 96.1%);
+  --color-secondary-foreground: hsl(0 0% 9%);
+  
+  --color-muted: hsl(0 0% 96.1%);
+  --color-muted-foreground: hsl(0 0% 45.1%);
+  
+  --color-accent: hsl(179 77% 31%);
+  --color-accent-foreground: hsl(0 0% 9%);
+  
+  --color-destructive: hsl(0 84.2% 60.2%);
+  --color-destructive-foreground: hsl(0 0% 98%);
+  
+  --color-border: hsl(0 0% 89.8%);
+  --color-input: hsl(0 0% 89.8%);
+  --color-ring: hsl(179 77% 31%);
+
+  --radius-xl: 0.75rem;
+
+  --radius-xl: 0.75rem;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+  }
+  @keyframes marquee-vertical {
+    from { transform: translateY(0); }
+    to { transform: translateY(-100%); }
+  }
+  --animation-marquee: marquee 40s linear infinite;
+  --animation-marquee-vertical: marquee-vertical 40s linear infinite;
+
+  --color-background: white;
+}
+
+@utility animate-marquee {
+  animation: var(--animation-marquee);
+}
+
+@utility animate-marquee-vertical {
+  animation: var(--animation-marquee-vertical);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-white text-foreground antialiased;
+    font-family: var(--font-sans);
+  }
+}
