@@ -39,16 +39,6 @@ export default async function HomePage() {
       {/* Main Footer */}
       <Footer />
 
-      {/* Admin Quick Link */}
-      <div className="fixed bottom-8 right-8 z-50">
-        <Link 
-          href="/admin" 
-          className="bg-black text-white px-6 py-3 rounded-full font-bold text-sm shadow-2xl hover:scale-105 transition-transform flex items-center gap-2"
-        >
-          <div className="w-2 h-2 bg-[#128a88] rounded-full animate-pulse"></div>
-          Go to Admin
-        </Link>
-      </div>
     </div>
   )
 }
