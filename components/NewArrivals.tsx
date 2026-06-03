@@ -4,8 +4,13 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { Eye, Heart, X, Minus, Plus, Star, CheckCircle2, Maximize2, Image as ImageIcon } from 'lucide-react'
 import { PRODUCTS, Product } from '@/lib/products'
+import { getProductUrl } from '@/lib/utils'
 
-export const NewArrivals = () => {
+interface NewArrivalsProps {
+  initialProducts?: Product[]
+}
+
+export const NewArrivals: React.FC<NewArrivalsProps> = ({ initialProducts }) => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [quantity, setQuantity] = useState(1)
 
@@ -20,6 +25,85 @@ export const NewArrivals = () => {
     setSelectedProduct(null)
   }
 
+  const handleAddToCart = (e: React.MouseEvent, product: Product, qty: number = 1) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const user = localStorage.getItem('skyfit_user')
+    if (!user) {
+      window.dispatchEvent(new Event('open-auth-modal'))
+      return
+    }
+    
+    const defaultColor = product.colors?.[0] || null
+    const defaultSize = product.sizes?.[0] || null
+    const compositeId = `${product.id}-${defaultColor || 'none'}-${defaultSize || 'none'}`
+
+    const cartProduct = {
+      ...product,
+      id: compositeId,
+      productId: product.id,
+      selectedColor: defaultColor,
+      selectedSize: defaultSize
+    }
+
+    try {
+      const cart = JSON.parse(localStorage.getItem('skyfit_cart') || '[]')
+      const existingIdx = cart.findIndex((item: any) => item.id === cartProduct.id)
+      if (existingIdx > -1) {
+        cart[existingIdx].qty += qty
+      } else {
+        cart.push({ ...cartProduct, qty })
+      }
+      localStorage.setItem('skyfit_cart', JSON.stringify(cart))
+      window.dispatchEvent(new Event('sync-cart-wishlist'))
+      window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: `"${product.name}" added to cart successfully!` } }))
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleAddToWishlist = (e: React.MouseEvent, product: Product) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const user = localStorage.getItem('skyfit_user')
+    if (!user) {
+      window.dispatchEvent(new Event('open-auth-modal'))
+      return
+    }
+
+    try {
+      const wishlist = JSON.parse(localStorage.getItem('skyfit_wishlist') || '[]')
+      const existingIdx = wishlist.findIndex((item: any) => item.id === product.id)
+      if (existingIdx === -1) {
+        wishlist.push(product)
+        localStorage.setItem('skyfit_wishlist', JSON.stringify(wishlist))
+        window.dispatchEvent(new Event('sync-cart-wishlist'))
+        
+        // Save to DB in background
+        try {
+          const loggedUser = JSON.parse(user)
+          if (loggedUser && loggedUser.email) {
+            fetch('/api/wishlist', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: loggedUser.email, productId: product.id })
+            }).catch(err => console.error("Wishlist DB Sync Error:", err))
+          }
+        } catch (uerr) {
+          console.error("User parse error during wishlist save:", uerr)
+        }
+
+        window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: `"${product.name}" added to wishlist successfully!` } }))
+      } else {
+        window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: `"${product.name}" is already in your wishlist!` } }))
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const productsList = initialProducts && initialProducts.length > 0 ? initialProducts : PRODUCTS
+
   return (
     <section className="max-w-7xl mx-auto px-4 lg:px-6 py-8 sm:py-12">
       <div className="flex items-center justify-between mb-6 sm:mb-8">
@@ -33,9 +117,9 @@ export const NewArrivals = () => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 sm:gap-x-6 gap-y-8 sm:gap-y-10">
-        {PRODUCTS.map((product) => (
+        {productsList.map((product) => (
           <Link 
-            href={`/product/${product.id}`} 
+            href={getProductUrl(product)} 
             key={product.id} 
             className="group cursor-pointer block"
           >
@@ -43,17 +127,24 @@ export const NewArrivals = () => {
             <div className="relative aspect-square rounded-2xl bg-[#f3f4f6] overflow-hidden mb-3 flex items-center justify-center transition-all duration-300 group-hover:bg-white group-hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)]">
               
               {/* Image Representation */}
-              <div className="flex flex-col items-center justify-center opacity-20 group-hover:opacity-40 transition-opacity">
-                <ImageIcon className="text-gray-600 w-12 h-12 sm:w-16 sm:h-16" strokeWidth={1} />
+              <div className="w-full h-full flex items-center justify-center transition-all duration-300 group-hover:scale-105">
+                {product.images[0] && product.images[0].startsWith('http') ? (
+                  <img 
+                    src={product.images[0]} 
+                    alt={product.name} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="opacity-20 group-hover:opacity-40 transition-opacity">
+                    <ImageIcon className="text-gray-600 w-12 h-12 sm:w-16 sm:h-16" strokeWidth={1} />
+                  </div>
+                )}
               </div>
 
               {/* Mobile / Tablet Quick-Access Actions (Always visible on touch screens below lg) */}
               <div className="absolute top-2 right-2 z-20 flex flex-col gap-1.5 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300">
                 <button 
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                  }}
+                  onClick={(e) => handleAddToWishlist(e, product)}
                   className="w-8 h-8 rounded-full bg-white/95 text-gray-600 hover:text-red-500 flex items-center justify-center shadow-sm backdrop-blur-sm transition-all focus:outline-none"
                   aria-label="Add to Wishlist"
                 >
@@ -70,10 +161,7 @@ export const NewArrivals = () => {
 
               <div className="absolute bottom-2 right-2 z-20 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300">
                 <button 
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                  }}
+                  onClick={(e) => handleAddToCart(e, product, 1)}
                   className="w-8 h-8 rounded-full bg-[#3b5cf6] text-white hover:bg-blue-700 flex items-center justify-center shadow-md transition-all focus:outline-none"
                   aria-label="Add to Cart"
                 >
@@ -91,19 +179,13 @@ export const NewArrivals = () => {
                   <Eye size={18} />
                 </button>
                 <button 
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                  }}
+                  onClick={(e) => handleAddToCart(e, product, 1)}
                   className="h-10 px-6 rounded-full bg-[#3b5cf6] text-white text-sm font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all focus:outline-none"
                 >
                   Add to cart
                 </button>
                 <button 
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                  }}
+                  onClick={(e) => handleAddToWishlist(e, product)}
                   className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-700 hover:bg-red-500 hover:text-white transition-all focus:outline-none"
                   title="Add to Wishlist"
                 >
@@ -146,39 +228,40 @@ export const NewArrivals = () => {
             </button>
 
             {/* Product Images Area */}
-            <div className="w-full md:w-1/2 p-4 sm:p-8 flex flex-col-reverse sm:flex-row gap-4 flex-shrink-0">
-              {/* Thumbnails */}
-              <div className="flex sm:flex-col flex-row gap-2 sm:gap-3 overflow-x-auto justify-center sm:justify-start">
-                {selectedProduct.images.map((img, i) => (
-                  <div key={i} className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl border-2 ${i === 0 ? 'border-[#3b5cf6]' : 'border-gray-100 bg-gray-50'} p-1.5 sm:p-2 flex items-center justify-center flex-shrink-0 cursor-pointer`}>
-                    <ImageIcon size={20} className="text-gray-300" />
-                  </div>
-                ))}
-              </div>
-              
+            <div className="w-full md:w-1/2 p-4 sm:p-8 flex flex-shrink-0 justify-center">
               {/* Main Image */}
-              <div className="flex-1 bg-[#f8f9fa] rounded-2xl sm:rounded-3xl relative flex items-center justify-center p-6 sm:p-12 aspect-square">
-                <ImageIcon size={80} strokeWidth={1} className="text-gray-200" />
-                <button className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/90 shadow-sm flex items-center justify-center text-gray-400 focus:outline-none">
-                  <Maximize2 size={16} />
-                </button>
+              <div className="w-full bg-[#f8f9fa] rounded-2xl sm:rounded-3xl relative flex items-center justify-center p-6 sm:p-12 aspect-square">
+                {selectedProduct.images[0] && selectedProduct.images[0].startsWith('http') ? (
+                  <img src={selectedProduct.images[0]} className="w-full h-full object-contain rounded-xl sm:rounded-2xl" alt={selectedProduct.name} />
+                ) : (
+                  <ImageIcon size={80} strokeWidth={1} className="text-gray-200" />
+                )}
               </div>
             </div>
 
             {/* Product Info Area */}
             <div className="w-full md:w-1/2 p-6 sm:p-8 md:pl-0 flex flex-col justify-center">
               <div className="mb-4 sm:mb-6">
-                <span className="px-3 py-1 bg-[#22c55e] text-white text-[10px] font-black rounded-full uppercase tracking-wider">
-                  Sale {Math.round((1 - selectedProduct.price / selectedProduct.oldPrice) * 100)}% OFF
-                </span>
+                {selectedProduct.oldPrice ? (
+                  <span className="px-3 py-1 bg-[#22c55e] text-white text-[10px] font-black rounded-full uppercase tracking-wider">
+                    Sale {Math.round((1 - selectedProduct.price / selectedProduct.oldPrice) * 100)}% OFF
+                  </span>
+                ) : null}
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-black text-[#1a1a1a] mb-2 sm:mb-4">{selectedProduct.name}</h2>
 
               <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="flex text-yellow-400">
-                  {[...Array(selectedProduct.rating)].map((_, i) => <Star key={i} size={16} fill="currentColor" className="text-yellow-400" />)}
-                  {[...Array(5 - selectedProduct.rating)].map((_, i) => <Star key={i} size={16} className="text-gray-200" />)}
+                  {(() => {
+                    const rating = Math.min(5, Math.max(0, Math.round(selectedProduct.rating || 0)));
+                    return (
+                      <>
+                        {[...Array(rating)].map((_, i) => <Star key={i} size={16} fill="currentColor" className="text-yellow-400" />)}
+                        {[...Array(5 - rating)].map((_, i) => <Star key={i} size={16} className="text-gray-200" />)}
+                      </>
+                    );
+                  })()}
                 </div>
                 <span className="text-xs font-bold text-gray-400">{selectedProduct.reviewsCount} customer reviews</span>
                 <div className="flex items-center gap-1.5 text-[#22c55e]">
@@ -221,10 +304,16 @@ export const NewArrivals = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mt-2 sm:mt-4">
-                <button className="w-full sm:flex-1 h-12 rounded-full bg-[#3b5cf6] text-white font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 focus:outline-none">
+                <button 
+                  onClick={(e) => handleAddToCart(e, selectedProduct, quantity)}
+                  className="w-full sm:flex-1 h-12 rounded-full bg-[#3b5cf6] text-white font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 focus:outline-none"
+                >
                   Add to Cart
                 </button>
-                <button className="w-full sm:flex-1 h-12 rounded-full bg-[#0c1222] text-white font-bold hover:bg-black transition-all flex items-center justify-center gap-2 focus:outline-none">
+                <button 
+                  onClick={(e) => handleAddToWishlist(e, selectedProduct)}
+                  className="w-full sm:flex-1 h-12 rounded-full bg-[#0c1222] text-white font-bold hover:bg-black transition-all flex items-center justify-center gap-2 focus:outline-none"
+                >
                   <Heart size={18} />
                   Add to Wishlist
                 </button>

@@ -1,7 +1,6 @@
 import React from 'react'
-import { Header } from '@/components/Header'
 import { Inter, Outfit } from 'next/font/google'
-import './styles.css'
+import '../(frontend)/styles.css'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -16,21 +15,18 @@ const outfit = Outfit({
 })
 
 export const metadata = {
-  description: 'SkyFit - Premium Fitness Store',
-  title: 'SkyFit',
+  description: 'SkyFit - Admin Dashboard',
+  title: 'SkyFit Admin',
   icons: {
     icon: '/faviconskyfit.png',
   },
 }
 
-export default async function RootLayout(props: { children: React.ReactNode }) {
-  const { children } = props
-
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
-      <body className="bg-white font-sans">
-        <Header />
-        <main>{children}</main>
+      <body className="bg-gray-50 text-gray-900 min-h-screen font-sans">
+        {children}
       </body>
     </html>
   )

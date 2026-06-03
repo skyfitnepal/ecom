@@ -1,21 +1,27 @@
 export interface Product {
-  id: number
+  id: string
   name: string
   price: number
-  oldPrice: number
+  oldPrice: number | null
   desc: string
   rating: number
   reviewsCount: number
   inStock: boolean
   colors: string[]
   sizes: string[]
-  images: string[] // SVG placeholders or placeholder icon representation
+  images: string[]
   category: string
+  has_variants?: boolean
+  variant_options?: string[]
+  variants?: any[]
+  seo_title?: string
+  seo_description?: string
+  seo_keywords?: string
 }
 
 export const PRODUCTS: Product[] = [
   {
-    id: 1,
+    id: '1',
     name: 'Cast Iron Dumbbell Set (20kg)',
     price: 899,
     oldPrice: 1200,
@@ -29,7 +35,7 @@ export const PRODUCTS: Product[] = [
     category: 'Strength'
   },
   {
-    id: 2,
+    id: '2',
     name: 'Indoor Steel Adjustable Silent Treadmill',
     price: 45000,
     oldPrice: 52000,
@@ -43,7 +49,7 @@ export const PRODUCTS: Product[] = [
     category: 'Cardio'
   },
   {
-    id: 3,
+    id: '3',
     name: 'Premium Non-Slip Yoga Mat',
     price: 1500,
     oldPrice: 2200,
@@ -57,7 +63,7 @@ export const PRODUCTS: Product[] = [
     category: 'Yoga & Pilates'
   },
   {
-    id: 4,
+    id: '4',
     name: 'Adjustable Power Weight Bench',
     price: 8500,
     oldPrice: 11000,
@@ -71,7 +77,7 @@ export const PRODUCTS: Product[] = [
     category: 'Strength'
   },
   {
-    id: 5,
+    id: '5',
     name: 'Resistance Band Pro Set',
     price: 1200,
     oldPrice: 1800,
@@ -85,7 +91,7 @@ export const PRODUCTS: Product[] = [
     category: 'Accessories'
   },
   {
-    id: 6,
+    id: '6',
     name: 'Elite Cardio Spin Bike',
     price: 32000,
     oldPrice: 38000,
@@ -99,7 +105,7 @@ export const PRODUCTS: Product[] = [
     category: 'Cardio'
   },
   {
-    id: 7,
+    id: '7',
     name: 'Professional Boxing Gloves',
     price: 2800,
     oldPrice: 3500,
@@ -113,7 +119,7 @@ export const PRODUCTS: Product[] = [
     category: 'Combat'
   },
   {
-    id: 8,
+    id: '8',
     name: 'Olympic Barbell Rack',
     price: 12500,
     oldPrice: 15000,

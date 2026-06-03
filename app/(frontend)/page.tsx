@@ -9,10 +9,15 @@ import { NewArrivals } from '@/components/NewArrivals'
 import { PromoBanner } from '@/components/PromoBanner'
 import { Testimonials } from '@/components/Testimonials'
 import { Footer } from '@/components/Footer'
+import { getNewArrivals, getCategories } from '@/lib/db'
 
 export default async function HomePage() {
   const payload = await getPayload({ config })
   const { user } = await payload.auth({ headers: await headers() })
+
+  // Fetch live products from database
+  const newArrivals = await getNewArrivals(8)
+  const categories = await getCategories(12)
 
   return (
     <div className="bg-white min-h-screen">
@@ -20,10 +25,10 @@ export default async function HomePage() {
       <Hero />
 
       {/* Browse by Category Slider */}
-      <Categories />
+      <Categories categories={categories} />
 
       {/* New Arrivals Grid */}
-      <NewArrivals />
+      <NewArrivals initialProducts={newArrivals} />
 
       {/* Promo Banner Section */}
       <PromoBanner />

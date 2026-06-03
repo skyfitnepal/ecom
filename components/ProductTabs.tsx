@@ -114,16 +114,12 @@ export const ProductTabs: React.FC<ProductTabsProps> = ({ product }) => {
           {activeTab === 'desc' && (
             <div>
               <h3 className="text-lg font-black text-[#0c1222] mb-6">Specifications:</h3>
-              <div className="space-y-6 max-w-4xl text-sm font-semibold text-gray-500 leading-relaxed">
-                <p>
-                  Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
-                </p>
-                <p>
-                  Specifically optimized for durability and heavy usage. Designed with human biomechanics in mind to ensure correct posture and body alignment during training.
-                </p>
-                <p>
-                  Ideal for professional gyms, fitness studios, as well as home workouts. Crafted using premium, highly resilient composite materials that resist wear and tear over long workout sessions.
-                </p>
+              <div className="space-y-6 max-w-4xl text-sm font-semibold text-gray-500 leading-relaxed whitespace-pre-wrap">
+                {product.desc ? (
+                  <p>{product.desc}</p>
+                ) : (
+                  <p>No description available for this product.</p>
+                )}
               </div>
             </div>
           )}
@@ -162,9 +158,12 @@ export const ProductTabs: React.FC<ProductTabsProps> = ({ product }) => {
                           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{rev.date}</span>
                         </div>
                         <div className="flex gap-0.5 text-yellow-400">
-                          {[...Array(rev.rating)].map((_, i) => (
-                            <Star key={i} size={12} fill="currentColor" />
-                          ))}
+                          {(() => {
+                            const rating = Math.min(5, Math.max(0, Math.round(rev.rating || 0)));
+                            return [...Array(rating)].map((_, i) => (
+                              <Star key={i} size={12} fill="currentColor" />
+                            ));
+                          })()}
                         </div>
                       </div>
                       <p className="text-sm font-semibold text-gray-500 leading-relaxed">

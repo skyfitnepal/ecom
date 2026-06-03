@@ -27,6 +27,9 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || "",
   }),
+  routes: {
+    admin: '/payload-admin',
+  },
   sharp,
   plugins: [],
 });

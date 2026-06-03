@@ -10,18 +10,25 @@ import { Navigation } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/navigation'
 
-const CATEGORIES = [
-  { name: 'Laptop & PC', icon: '💻' },
-  { name: 'Watches', icon: '⌚' },
-  { name: 'Mobile & Tablets', icon: '📱' },
-  { name: 'Health & Sports', icon: '🏃' },
-  { name: 'Home Appliances', icon: '🏠' },
-  { name: 'Games & Videos', icon: '🎮' },
-  { name: 'Audio & Music', icon: '🎧' },
-  { name: 'Gym Gear', icon: '🏋️' },
+import { CategoryData } from '@/lib/db'
+
+// Fallback fitness categories in case the database list is empty
+const FALLBACK_CATEGORIES: CategoryData[] = [
+  { name: 'Strength Training', slug: 'strength-training', icon: '🏋️', count: 0, thumbnail: 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=300&h=300&fit=crop&auto=format&q=80' },
+  { name: 'Cardio Machines', slug: 'cardio-machines', icon: '🏃', count: 0, thumbnail: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=300&h=300&fit=crop&auto=format&q=80' },
+  { name: 'Yoga & Pilates', slug: 'yoga-and-pilates', icon: '🧘', count: 0, thumbnail: 'https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=300&h=300&fit=crop&auto=format&q=80' },
+  { name: 'Boxing & MMA', slug: 'boxing-and-mma', icon: '🥊', count: 0, thumbnail: 'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=300&h=300&fit=crop&auto=format&q=80' },
+  { name: 'Supplements', slug: 'supplements', icon: '💊', count: 0, thumbnail: 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=300&h=300&fit=crop&auto=format&q=80' },
+  { name: 'Accessories', slug: 'accessories', icon: '🎗️', count: 0, thumbnail: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=300&h=300&fit=crop&auto=format&q=80' },
 ]
 
-export const Categories = () => {
+interface CategoriesProps {
+  categories?: CategoryData[]
+}
+
+export const Categories: React.FC<CategoriesProps> = ({ categories = [] }) => {
+  const displayCategories = categories.length > 0 ? categories : FALLBACK_CATEGORIES
+
   return (
     <section className="max-w-7xl mx-auto px-4 lg:px-6 py-12">
       <div className="flex items-center justify-between mb-8">
@@ -51,16 +58,24 @@ export const Categories = () => {
         }}
         className="pb-4"
       >
-        {CATEGORIES.map((cat, index) => (
+        {displayCategories.map((cat, index) => (
           <SwiperSlide key={index}>
             <Link
-              href={`/category/${cat.name.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`}
+              href={`/category/${cat.slug}`}
               className="flex flex-col items-center group"
             >
-              <div className="w-24 h-24 rounded-full bg-[#f8f9fa] flex items-center justify-center mb-4 transition-all duration-300 group-hover:bg-white group-hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)] group-hover:-translate-y-1 mx-auto">
-                <span className="text-2xl filter group-hover:scale-110 transition-transform">{cat.icon}</span>
+              <div className="w-24 h-24 rounded-full bg-[#f8f9fa] flex items-center justify-center mb-4 overflow-hidden relative border border-gray-100 transition-all duration-300 group-hover:bg-white group-hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)] group-hover:-translate-y-1 mx-auto">
+                {cat.thumbnail ? (
+                  <img 
+                    src={cat.thumbnail} 
+                    alt={cat.name} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  />
+                ) : (
+                  <span className="text-2xl filter group-hover:scale-110 transition-transform">{cat.icon}</span>
+                )}
               </div>
-              <p className="text-sm font-bold text-[#1a1a1a] text-center group-hover:text-[#128a88] transition-colors">
+              <p className="text-sm font-bold text-[#1a1a1a] text-center group-hover:text-[#128a88] transition-colors line-clamp-1 max-w-[120px]">
                 {cat.name}
               </p>
             </Link>
@@ -70,3 +85,4 @@ export const Categories = () => {
     </section>
   )
 }
+
